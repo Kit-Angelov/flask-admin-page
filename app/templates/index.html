@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>App</title>
+    <style>
+        .main {
+            width: 100%;
+            max-width: 1200px;
+            height: auto;
+            margin: auto;
+        }
+        table, td, th {
+          border: 1px solid #ddd;
+          text-align: left;
+        }
+
+        table {
+          border-collapse: collapse;
+          width: 100%;
+        }
+
+        th, td {
+          padding: 15px;
+        }
+        .head {
+            width: 100%;
+            height: 100px;
+        }
+        .logout {
+            float: right;
+        }
+        .username {
+            float: left;
+        }
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="head">
+            <h1 class="username" id="username"></h1>
+            <a class="logout" href="/logout"><h2>logout</h2></a>
+        </div>
+        <div class="edit" id="edit">
+            <form onsubmit="saveUser(event)">
+                <input class="hide" id="new-id">
+                <input placeholder="username" id="new-username">
+                <input placeholder="password" id="new-password">
+                <select id="new-role" ></select>
+                <button type="submit">save</button>
+            </form>
+        </div>
+        <table>
+            <thead>
+            <tr id="thead-tr">
+                <th>username</th>
+                <th>role</th>
+            </tr>
+            </thead>
+            <tbody id="table-body">
+            </tbody>
+        </table>
+    </div>
+<script>
+    var users;
+    var profile = {
+        'id': null,
+        'username': '',
+        'role': ''
+    };
+    var roles = [];
+
+    function initHtmlElems() {
+        if (profile.role == 'admin') {
+            var theadTr = document.getElementById("thead-tr");
+            var deleteColumn = document.createElement('th');
+            deleteColumn.innerText = 'delete';
+            var changeColumn = document.createElement('th');
+            changeColumn.innerText = 'change';
+            theadTr.appendChild(deleteColumn);
+            theadTr.appendChild(changeColumn);
+        } else {
+            var edit = document.getElementById("edit");
+            edit.style.display = 'none';
+        }
+    }
+
+    function clearForm() {
+        document.getElementById('new-username').value = '';
+        document.getElementById("new-password").value = '';
+        document.getElementById("new-role").value = '';
+        document.getElementById("new-id").value = 1;
+    }
+
+    function httpRequest(method = "GET", url, callback, data = null) {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open(method, url, false);
+        xmlhttp.setRequestHeader("Content-Type", "application/json");
+        if (data !== null) {
+            xmlhttp.send(JSON.stringify(data));
+        } else {
+            xmlhttp.send();
+        }
+        if (xmlhttp.status != 200) {
+            alert(xmlhttp.responseText);
+        } else {
+            callback(JSON.parse(xmlhttp.response));
+        }
+    }
+
+    function setRoles(data) {
+        roles = data;
+        var select = document.getElementById("new-role");
+        for (var i = 0; i < roles.length; i++) {
+            var option = document.createElement("option");
+            option.value = roles[i].id;
+            option.innerText = roles[i].name;
+            select.appendChild(option);
+        }
+    }
+
+    function getRoles() {
+        httpRequest("GET", "/get_roles", setRoles);
+    }
+
+    function saveUser(e) {
+        e.preventDefault();
+        var username = document.getElementById('new-username').value;
+        var password = document.getElementById("new-password").value;
+        var role_id = document.getElementById("new-role").value;
+        var user_id = document.getElementById("new-id").value;
+        var data = {
+          'username': username,
+          'password': password,
+          'role_id': role_id,
+          'id': user_id
+        };
+        httpRequest("POST", "/save_user",  console.log, data);
+        getUsers();
+        clearForm();
+    }
+
+    function setProfile(data) {
+        profile.username = data.username;
+        profile.role = data.role;
+        profile.id = data.id;
+        var username = document.getElementById('username');
+        username.innerText = data.username;
+    }
+    function getProfile() {
+        httpRequest("GET", "/profile", setProfile);
+    }
+
+    function setTableData(usersList) {
+        var tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+        for (var i = 0; i < usersList.length; i++) {
+            if (usersList[i].id === profile.id ) {
+                continue;
+            }
+            var tr = document.createElement("tr");
+            var username = document.createElement("td");
+            username.innerHTML = usersList[i].username;
+            tr.appendChild(username);
+            var role = document.createElement("td");
+            role.innerHTML = usersList[i].role;
+            tr.appendChild(role);
+            if (profile.role == 'admin') {
+                var deleteButTd = document.createElement("td");
+                deleteButTd.innerHTML = "<button onclick='deleteUser(" + usersList[i].id + ")'>delete</button>";
+                tr.appendChild(deleteButTd);
+                var changeButTd = document.createElement("td");
+                changeButTd.innerHTML = "<button onclick='changeUser(\"" + usersList[i].username + "\",\"" + usersList[i].id + "\",\"" + usersList[i].role_id + "\")'>change</button>";
+                tr.appendChild(changeButTd);
+            }
+            tbody.appendChild(tr);
+        }
+    }
+
+    function getUsers() {
+        httpRequest("GET", "/users", setTableData)
+    }
+
+    function deleteUser(userId) {
+        var data = {
+            'user_id': userId
+        };
+        httpRequest("POST", "/delete_user", console.log, data);
+        getUsers();
+    }
+
+    function changeUser(changedUserUsername, changedUserId, changedUserRole) {
+        var username_input = document.getElementById("new-username");
+        username_input.value = changedUserUsername;
+        var role_select = document.getElementById("new-role");
+        role_select.value = changedUserRole;
+        var id_input = document.getElementById("new-id");
+        id_input.value = changedUserId;
+
+    }
+
+    function init () {
+        getProfile();
+        getRoles();
+        initHtmlElems();
+        getUsers();
+    }
+    init();
+</script>
+</body>
+</html>

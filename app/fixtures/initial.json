@@ -1,0 +1,72 @@
+[
+  {
+  "model": "app_permission",
+  "fields": {
+    "id": 1,
+    "name": "delete"
+    }
+  },
+  {
+  "model": "app_permission",
+  "fields": {
+    "id": 2,
+    "name": "create"
+    }
+  },
+  {
+  "model": "app_permission",
+  "fields": {
+    "id": 3,
+    "name": "update"
+    }
+  },
+  {
+  "model": "app_permission",
+  "fields": {
+    "id": 4,
+    "name": "read"
+    }
+  },
+  {
+  "model": "app_role",
+  "fields": {
+    "id": 1,
+    "name": "admin"
+    }
+  },
+  {
+  "model": "app_role",
+  "fields": {
+    "id": 2,
+    "name": "base"
+    }
+  },
+  {
+  "model": "app_permissions",
+  "fields": {
+    "permission_id": "2",
+    "role_id": "1"
+    }
+  },
+  {
+  "model": "app_permissions",
+  "fields": {
+    "permission_id": "3",
+    "role_id": "1"
+    }
+  },
+  {
+  "model": "app_permissions",
+  "fields": {
+    "permission_id": "4",
+    "role_id": "1"
+    }
+  },
+  {
+  "model": "app_permissions",
+  "fields": {
+    "permission_id": "4",
+    "role_id": "2"
+    }
+  }
+]

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        function auth(e) {
+            e.preventDefault();
+            var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+            xmlhttp.open("POST", "/login", false);
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            xmlhttp.send(JSON.stringify({
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            }));
+            if (xmlhttp.status != 200) {
+                alert(xmlhttp.responseText);
+            } else {
+              window.location = 'http://' + window.location.host;
+            }
+        }
+    </script>
+</head>
+<body>
+    <form onsubmit="auth(event)">
+        <input type="text" id="username" placeholder="username">
+        <input type="password" id="password" placeholder="password">
+        <button type="submit">login</button>
+    </form>
+</body>
+</html>
